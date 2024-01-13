@@ -1,3 +1,4 @@
 # UdemyDeepLearningX
 
-![UdemyDeepLearningX](https://github.com/FynnHollesen/UdemyDeepLearningX/assets/136230507/2338c13c-915c-4d45-b6bc-b5cdd97e1cfb)
+![image](https://github.com/FynnHollesen/UdemyDeepLearningX/assets/136230507/7ebdc728-26fe-498b-8d7a-211b654a1fa1)
+
