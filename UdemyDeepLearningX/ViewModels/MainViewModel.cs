@@ -8,8 +8,6 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using TorchSharp;
-using static TorchSharp.torch;
-using static TorchSharp.torch.nn;
 
 namespace UdemyDeepLearningX.ViewModels;
 
@@ -22,8 +20,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private Axis[] _yAxes;
 
-    private Tensor? _xTensor;
-    private Tensor? _yTensor;
+    private torch.Tensor? _xTensor;
+    private torch.Tensor? _yTensor;
 
     public MainViewModel()
     {
@@ -56,8 +54,8 @@ public partial class MainViewModel : ViewModelBase
     private void RandomizeValues()
     {
         var valueCount = 30;
-        _xTensor = randn(valueCount, 1);
-        _yTensor = _xTensor + randn(valueCount, 1) / 2;
+        _xTensor = torch.randn(valueCount, 1);
+        _yTensor = _xTensor + torch.randn(valueCount, 1) / 2;
 
         var observablePoints = GetObservablePointsFromTensors(_xTensor, _yTensor, 100);
 
@@ -70,7 +68,7 @@ public partial class MainViewModel : ViewModelBase
         };
     }
 
-    private static ObservableCollection<ObservablePoint> GetObservablePointsFromTensors(Tensor xTensor, Tensor yTensor, float factor)
+    private static ObservableCollection<ObservablePoint> GetObservablePointsFromTensors(torch.Tensor xTensor, torch.Tensor yTensor, float factor)
     {
         var observablePoints = new ObservableCollection<ObservablePoint>();
 
