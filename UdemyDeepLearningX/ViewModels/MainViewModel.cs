@@ -7,6 +7,8 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using TorchSharp;
+using static TorchSharp.torch.nn;
 
 namespace UdemyDeepLearningX.ViewModels;
 
@@ -24,7 +26,7 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
 
-        Series = Array.Empty<ISeries>();
+        Series = [];
 
         XAxes =
         [
@@ -51,19 +53,21 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void RandomizeChart()
     {
-        var random = new Random();
-        var values = new ObservableCollection<ObservablePoint>();
+        var valueCount = 30;
+        var x = torch.randn(valueCount, 1);
+        var y = x + torch.randn(valueCount, 1) / 2;
 
-        for (var i = 0; i < 30; i++)
+        var observablePoints = new ObservableCollection<ObservablePoint>();
+
+        for (var i = 0; i < valueCount; i++)
         {
-            var value = random.Next(-100, 100);
-            values.Add(new ObservablePoint(value, value + random.Next(-50, 50)));
+            observablePoints.Add(new ObservablePoint(x[i].item<float>() * 100, y[i].item<float>() * 100));
         }
 
         Series = new ISeries[1];
         Series[0] = new ScatterSeries<ObservablePoint>
         {
-            Values = values,
+            Values = observablePoints,
             Fill = new SolidColorPaint(SKColors.LightBlue),
             GeometrySize = 12
         };
