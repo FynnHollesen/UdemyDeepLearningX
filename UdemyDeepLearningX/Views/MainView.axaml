@@ -10,7 +10,7 @@
 
     <StackPanel Margin="20" Width="800">
         <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-            <Button Content="Randomize" Command="{Binding RandomizeChartCommand}" />
+            <Button Content="Randomize" Command="{Binding RandomizeValuesCommand}" />
         </StackPanel>
         <lvc:CartesianChart VerticalAlignment="Bottom" Width="800" Height="600" Series="{Binding Series}"
                             XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" />

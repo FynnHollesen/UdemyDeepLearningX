@@ -8,6 +8,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using TorchSharp;
+using static TorchSharp.torch;
 using static TorchSharp.torch.nn;
 
 namespace UdemyDeepLearningX.ViewModels;
@@ -16,12 +17,13 @@ public partial class MainViewModel : ViewModelBase
 {
     [ObservableProperty]
     private ISeries[] _series;
-
     [ObservableProperty]
     private Axis[] _xAxes;
-
     [ObservableProperty]
     private Axis[] _yAxes;
+
+    private Tensor? _xTensor;
+    private Tensor? _yTensor;
 
     public MainViewModel()
     {
@@ -47,22 +49,17 @@ public partial class MainViewModel : ViewModelBase
             }
         ];
 
-        RandomizeChart();
+        RandomizeValues();
     }
 
     [RelayCommand]
-    private void RandomizeChart()
+    private void RandomizeValues()
     {
         var valueCount = 30;
-        var x = torch.randn(valueCount, 1);
-        var y = x + torch.randn(valueCount, 1) / 2;
+        _xTensor = randn(valueCount, 1);
+        _yTensor = _xTensor + randn(valueCount, 1) / 2;
 
-        var observablePoints = new ObservableCollection<ObservablePoint>();
-
-        for (var i = 0; i < valueCount; i++)
-        {
-            observablePoints.Add(new ObservablePoint(x[i].item<float>() * 100, y[i].item<float>() * 100));
-        }
+        var observablePoints = GetObservablePointsFromTensors(_xTensor, _yTensor, 100);
 
         Series = new ISeries[1];
         Series[0] = new ScatterSeries<ObservablePoint>
@@ -71,5 +68,20 @@ public partial class MainViewModel : ViewModelBase
             Fill = new SolidColorPaint(SKColors.LightBlue),
             GeometrySize = 12
         };
+    }
+
+    private ObservableCollection<ObservablePoint> GetObservablePointsFromTensors(Tensor xTensor, Tensor yTensor, float factor)
+    {
+        var observablePoints = new ObservableCollection<ObservablePoint>();
+
+        if (!(xTensor.shape.Length == yTensor.shape.Length))
+            return observablePoints;
+
+        for (var i = 0; i < xTensor.shape[0]; i++)
+        {
+            observablePoints.Add(new ObservablePoint(xTensor[i].item<float>() * factor, yTensor[i].item<float>() * factor));
+        }
+
+        return observablePoints;
     }
 }
