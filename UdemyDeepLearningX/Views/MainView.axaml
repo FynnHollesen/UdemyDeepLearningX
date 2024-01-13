@@ -8,12 +8,18 @@
              x:DataType="vm:MainViewModel"
              xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia">
 
-    <StackPanel Margin="20" Width="800">
-        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-            <Button Content="Randomize" Command="{Binding RandomizeValuesCommand}" />
-        </StackPanel>
-        <lvc:CartesianChart VerticalAlignment="Bottom" Width="800" Height="600" Series="{Binding Series}"
-                            XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" />
-    </StackPanel>
+	<StackPanel Margin="20" Width="800">
+		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="20" >
+			<Button Content="Randomize Training Data" Command="{Binding RandomizeTrainingDataCommand}" />
+			<Button Content="Run Regression ANN" Command="{Binding RunModelCommand}" />
+
+			<StackPanel Orientation="Horizontal" Width="150">
+				<TextBlock VerticalAlignment="Center" Text="MSE: " Foreground="PaleVioletRed"/>
+				<TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding CalculatedMSE}" Foreground="PaleVioletRed"/>
+			</StackPanel>
+		</StackPanel>
+		<lvc:CartesianChart VerticalAlignment="Bottom" Width="800" Height="600" Series="{Binding Series}"
+                            XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"  />
+	</StackPanel>
 
 </UserControl>
