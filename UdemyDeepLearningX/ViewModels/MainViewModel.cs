@@ -70,7 +70,7 @@ public partial class MainViewModel : ViewModelBase
         };
     }
 
-    private ObservableCollection<ObservablePoint> GetObservablePointsFromTensors(Tensor xTensor, Tensor yTensor, float factor)
+    private static ObservableCollection<ObservablePoint> GetObservablePointsFromTensors(Tensor xTensor, Tensor yTensor, float factor)
     {
         var observablePoints = new ObservableCollection<ObservablePoint>();
 
