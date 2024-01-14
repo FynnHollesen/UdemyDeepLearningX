@@ -11,22 +11,28 @@
 	<StackPanel Width="800" Spacing="40" Margin="20">
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="60">
 
-			<StackPanel Orientation="Vertical" Spacing="20">
-				<TextBlock Text="Training Data" HorizontalAlignment="Center"  />
-				<Button Content="Randomize Training Data" Command="{Binding RandomizeTrainingDataCommand}" />
-			</StackPanel>
+			<StackPanel Orientation="Vertical" >
+				<StackPanel Orientation="Horizontal" Spacing="20">
 
-			<StackPanel Orientation="Vertical" Spacing="20">
-				<TextBlock Text="DeepLearning Model" HorizontalAlignment="Center" />
-				<Button Content="Run Regression ANN" Command="{Binding RunModelCommand}" />
-			</StackPanel>
+					<StackPanel Orientation="Vertical" Width="200">
+						<TextBlock HorizontalAlignment="Center" Text="{Binding NumberOfDataPoints, StringFormat='Data Points: {0}'}"/>
+						<Slider Value="{Binding NumberOfDataPoints}"/>
+					<Button HorizontalAlignment="Center" HorizontalContentAlignment="Center" Content="Randomize Points" Command="{Binding RandomizeTrainingDataCommand}" Width="150" />
+					</StackPanel>
 
-			<StackPanel Orientation="Vertical" Spacing="20">
-				<TextBlock Text="Loss / Cost" HorizontalAlignment="Center" />
-				<StackPanel Height="30" Orientation="Horizontal" VerticalAlignment="Center">
-					<TextBlock VerticalAlignment="Center" Text="MSE: " Foreground="PaleVioletRed"/>
-					<TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding CalculatedMSE}" Foreground="PaleVioletRed"/>
+					<StackPanel Orientation="Vertical" Width="200">
+						<TextBlock HorizontalAlignment="Center" Text="{Binding LearningRate, StringFormat='Learning Rate: {0:0.00}'}"/>
+						<Slider Maximum="1" Value="{Binding LearningRate}" IsSnapToTickEnabled="True" TickFrequency="0.01"/>
+						<Button HorizontalAlignment="Center" HorizontalContentAlignment="Center" Content="Predict Points" Command="{Binding PredictDataCommand}" Width="150"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Vertical" Width="200">
+						<TextBlock HorizontalAlignment="Center" Text="{Binding EpochCount, StringFormat='Number of Epochs: {0}'}"/>
+						<Slider Maximum="1000" Value="{Binding EpochCount}" />
+					<Button  HorizontalAlignment="Center" HorizontalContentAlignment="Center" Content="Train Model" Command="{Binding TrainModelCommand}" Width="150"/>
+					</StackPanel>
 				</StackPanel>
+
 			</StackPanel>
 		</StackPanel>
 

@@ -19,9 +19,24 @@ public partial class MainViewModel : ViewModelBase
     private Axis[] _xAxes;
     [ObservableProperty]
     private Axis[] _yAxes;
+
+    [ObservableProperty]
+    private ObservableCollection<ObservablePoint> _trainingDataPoints;
+    [ObservableProperty]
+    private ObservableCollection<ObservablePoint> _predictedDataPoints;
+
+    [ObservableProperty]
+    private int _numberOfDataPoints = 20;
+
+    [ObservableProperty]
+    private float _learningRate = 0.05f;
+    [ObservableProperty]
+    private int _epochCount = 500;
+
     [ObservableProperty]
     private float _calculatedMSE;
 
+    private TorchSharp.Modules.Sequential _ann;
     private torch.Tensor _xTensor;
     private torch.Tensor _yTensor;
     private torch.Tensor _testLoss;
@@ -31,19 +46,28 @@ public partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
+        _trainingDataPoints = new ObservableCollection<ObservablePoint>();
+        _predictedDataPoints = new ObservableCollection<ObservablePoint>();
+
+        _ann = torch.nn.Sequential(torch.nn.Linear(1, 1), torch.nn.ReLU(), torch.nn.Linear(1, 1));
+        _xTensor = torch.randn(0, 0);
+        _yTensor = torch.randn(0, 0);
+        _testLoss = torch.randn(0, 0);
 
         Series = new ISeries[2];
         Series[0] = new ScatterSeries<ObservablePoint>
         {
             Name = "Training data",
             Fill = new SolidColorPaint(SKColors.LightBlue),
-            GeometrySize = 12
+            GeometrySize = 12,
+            Values = _trainingDataPoints
         };
         Series[1] = new ScatterSeries<ObservablePoint>
         {
             Name = "Predicted data",
             Fill = new SolidColorPaint(SKColors.PaleVioletRed),
-            GeometrySize = 12
+            GeometrySize = 12,
+            Values = _predictedDataPoints
         };
 
         XAxes =
@@ -64,41 +88,38 @@ public partial class MainViewModel : ViewModelBase
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
-
-        RandomizeTrainingData();
-        RunModel();
     }
 
     [RelayCommand]
     private void RandomizeTrainingData()
     {
-        var valueCount = 30;
-        _xTensor = torch.randn(valueCount, 1);
-        _yTensor = _xTensor + torch.randn(valueCount, 1) / 2;
+        _xTensor = torch.randn(NumberOfDataPoints, 1);
+        _yTensor = _xTensor + torch.randn(NumberOfDataPoints, 1) / 2;
 
         var observablePoints = GetObservablePointsFromTensors(_xTensor, _yTensor, _factor, _decimals);
 
-        Series[0].Values = observablePoints;
+        TrainingDataPoints.Clear();
+        foreach (var observablePoint in observablePoints)
+        {
+            TrainingDataPoints.Add(observablePoint);
+        }
     }
 
     [RelayCommand]
-    private void RunModel()
+    private void TrainModel()
     {
-        var ann = torch.nn.Sequential(torch.nn.Linear(1, 1), torch.nn.ReLU(), torch.nn.Linear(1, 1));
-
-        var learningRate = 0.05;
+        if (_xTensor.shape[0] == 0)
+            return;
 
         var lossFunction = torch.nn.MSELoss();
 
-        var optimizer = torch.optim.SGD(ann.parameters(), learningRate);
+        var optimizer = torch.optim.SGD(_ann.parameters(), LearningRate);
 
-        var epochCount = 500;
-        
-        var losses = torch.zeros(epochCount);
+        var losses = torch.zeros(EpochCount);
 
-        for (var epoch = 0; epoch < epochCount; epoch++)
+        for (var epoch = 0; epoch < EpochCount; epoch++)
         {
-            var yHat = ann.forward(_xTensor);
+            var yHat = _ann.forward(_xTensor);
 
             var loss = lossFunction.forward(yHat, _yTensor);
 
@@ -110,15 +131,26 @@ public partial class MainViewModel : ViewModelBase
 
             optimizer.step();
         }
+    }
 
-        var predictedY = ann.forward(_xTensor);
+    [RelayCommand]
+    private void PredictData()
+    {
+        if (_xTensor.shape[0] == 0)
+            return;
+
+        var predictedY = _ann.forward(_xTensor);
 
         var testLoss = (predictedY - _yTensor).pow(2).mean();
         CalculatedMSE = testLoss.item<float>();
 
         var observablePoints = GetObservablePointsFromTensors(_xTensor, predictedY, _factor, _decimals);
 
-        Series[1].Values = observablePoints;
+        PredictedDataPoints.Clear();
+        foreach (var observablePoint in observablePoints)
+        {
+            PredictedDataPoints.Add(observablePoint);
+        }
     }
 
     private static ObservableCollection<ObservablePoint> GetObservablePointsFromTensors(torch.Tensor xTensor, torch.Tensor yTensor, float factor, int decimals)
