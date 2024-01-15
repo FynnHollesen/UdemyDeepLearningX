@@ -21,10 +21,13 @@
 				<Slider Maximum="1" Value="{Binding LearningRate}" IsSnapToTickEnabled="True" TickFrequency="0.01"/>
 
 				<TextBlock HorizontalAlignment="Stretch" Text="{Binding EpochCount, StringFormat='Epochs: {0}'}"/>
-				<Slider Maximum="1000" Value="{Binding EpochCount}" />
+				<Slider Minimum="1" Maximum="1000" Value="{Binding EpochCount}" />
+
+				<TextBlock HorizontalAlignment="Stretch" Text="{Binding TrainingIterations, StringFormat='Iterations: {0}'}"/>
+				<Slider Minimum="1" Maximum="100" Value="{Binding TrainingIterations}" />
 				
-				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Predict Points" Command="{Binding PredictDataCommand}"/>
 				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Randomize Points" Command="{Binding RandomizeTrainingDataCommand}" />
+				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Predict Points" Command="{Binding PredictDataCommand}"/>
 				<Button  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Train Model" Command="{Binding TrainModelCommand}"/>
 				<Button  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Reset Model" Command="{Binding ResetModelCommand}"/>
 			</StackPanel>
@@ -34,6 +37,9 @@
 
 		<lvc:CartesianChart Width="600" Height="600"
 							Series="{Binding LossesPointsSeries}" XAxes="{Binding LossesPointsXAxes}" YAxes="{Binding LossesPointsYAxes}"  />
+
+		<lvc:CartesianChart Width="600" Height="600"
+							Series="{Binding CostPointsSeries}" XAxes="{Binding CostPointsXAxes}" YAxes="{Binding CostPointsYAxes}"  />
 
 	</StackPanel>
 </UserControl>

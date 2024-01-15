@@ -28,29 +28,37 @@ public partial class MainViewModel : ViewModelBase
     private Axis[] _lossesPointsYAxes;
 
     [ObservableProperty]
+    private ISeries[] _costPointsSeries;
+    [ObservableProperty]
+    private Axis[] _costPointsXAxes;
+    [ObservableProperty]
+    private Axis[] _costPointsYAxes;
+
+    [ObservableProperty]
     private ObservableCollection<ObservablePoint> _trainingDataPoints;
     [ObservableProperty]
     private ObservableCollection<ObservablePoint> _predictedDataPoints;
     [ObservableProperty]
     private ObservableCollection<ObservablePoint> _lossesDataPoints;
+    [ObservableProperty]
+    private ObservableCollection<ObservablePoint> _costDataPoints;
 
     [ObservableProperty]
     private int _numberOfDataPoints = 20;
     [ObservableProperty]
     private double _dataRange = 0.1;
-
     [ObservableProperty]
     private double _learningRate = 0.05;
     [ObservableProperty]
     private int _epochCount = 500;
-
     [ObservableProperty]
-    private double _calculatedMSE;
+    private int _trainingIterations = 10;
 
     private TorchSharp.Modules.Sequential _ann;
-    private torch.Tensor _xTensor;
-    private torch.Tensor _yTensor;
-    private torch.Tensor _testLoss;
+    private torch.Tensor _dataPointsXTensor;
+    private torch.Tensor _dataPointsYTensor;
+    private torch.Tensor _costTensor;
+    private int _currentTrainingIteration = 0;
 
     private readonly int _decimals = 2;
 
@@ -59,11 +67,12 @@ public partial class MainViewModel : ViewModelBase
         _trainingDataPoints = [];
         _predictedDataPoints = [];
         _lossesDataPoints = [];
+        _costDataPoints = [];
 
         _ann = torch.nn.Sequential(torch.nn.Linear(1, 1), torch.nn.ReLU(), torch.nn.Linear(1, 1));
-        _xTensor = torch.randn(0, 0);
-        _yTensor = torch.randn(0, 0);
-        _testLoss = torch.randn(0, 0);
+        _dataPointsXTensor = torch.randn(0, 0);
+        _dataPointsYTensor = torch.randn(0, 0);
+        _costTensor = torch.randn(0, 0);
 
         _dataPointsSeries = new ISeries[2];
         _dataPointsSeries[0] = new ScatterSeries<ObservablePoint>
@@ -73,6 +82,7 @@ public partial class MainViewModel : ViewModelBase
             GeometrySize = 12,
             Values = _trainingDataPoints
         };
+
         _dataPointsSeries[1] = new ScatterSeries<ObservablePoint>
         {
             Name = "Predicted data",
@@ -81,15 +91,32 @@ public partial class MainViewModel : ViewModelBase
             Values = _predictedDataPoints
         };
 
+        _lossesPointsSeries = new ISeries[1];
+        _lossesPointsSeries[0] = new ScatterSeries<ObservablePoint>
+        {
+            Name = "Losses",
+            Fill = new SolidColorPaint(SKColors.PaleVioletRed),
+            GeometrySize = 6,
+            Values = _lossesDataPoints
+        };
+
+        _costPointsSeries = new ISeries[1];
+        _costPointsSeries[0] = new ScatterSeries<ObservablePoint>
+        {
+            Name = "Cost",
+            Fill = new SolidColorPaint(SKColors.PaleVioletRed),
+            GeometrySize = 6,
+            Values = _costDataPoints
+        };
+
         _dataPointsXAxes =
-        [
+            [
             new Axis
             {
                 MaxLimit = 1,
                 MinLimit =  - 1,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
-            }
-        ];
+            }];
         _dataPointsYAxes =
         [
             new Axis
@@ -99,26 +126,34 @@ public partial class MainViewModel : ViewModelBase
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
-
-        _lossesPointsSeries = new ISeries[1];
-        _lossesPointsSeries[0] = new ScatterSeries<ObservablePoint>
-        {
-            Name = "Losses",
-            Fill = new SolidColorPaint(SKColors.Red),
-            GeometrySize = 6,
-            Values = _lossesDataPoints
-        };
-
         _lossesPointsXAxes =
         [
             new Axis
             {
                 MaxLimit = EpochCount,
-                MinLimit =  0,
+                MinLimit =  1,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
         _lossesPointsYAxes =
+        [
+            new Axis
+            {
+                MaxLimit =  1,
+                MinLimit =  0,
+                LabelsPaint = new SolidColorPaint(SKColors.LightGray)
+            }
+        ];
+        _costPointsXAxes =
+        [
+            new Axis
+            {
+                MaxLimit = TrainingIterations,
+                MinLimit =  1,
+                LabelsPaint = new SolidColorPaint(SKColors.LightGray)
+            }
+        ];
+        _costPointsYAxes =
         [
             new Axis
             {
@@ -133,15 +168,18 @@ public partial class MainViewModel : ViewModelBase
     private void ResetModel()
     {
         _ann = torch.nn.Sequential(torch.nn.Linear(1, 1), torch.nn.ReLU(), torch.nn.Linear(1, 1));
+        PredictedDataPoints.Clear();
+        LossesDataPoints.Clear();
+        CostDataPoints.Clear();
     }
 
     [RelayCommand]
     private void RandomizeTrainingData()
     {
-        _xTensor = torch.randn(NumberOfDataPoints, 1);
-        _yTensor = _xTensor + torch.randn(NumberOfDataPoints, 1) * DataRange;
+        _dataPointsXTensor = torch.randn(NumberOfDataPoints, 1);
+        _dataPointsYTensor = _dataPointsXTensor + torch.randn(NumberOfDataPoints, 1) * DataRange;
 
-        var observablePoints = GetObservablePointsFromTensors(_xTensor, _yTensor, _decimals);
+        var observablePoints = GetObservablePointsFromTensors(_dataPointsXTensor, _dataPointsYTensor, _decimals);
 
         TrainingDataPoints.Clear();
         foreach (var observablePoint in observablePoints)
@@ -153,21 +191,28 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void TrainModel()
     {
-        if (_xTensor.shape[0] == 0)
-            return;
+        if (_currentTrainingIteration == 0)
+        {
+            CostDataPoints.Clear();
+            _costTensor = torch.zeros(TrainingIterations);
+        }
+
+        if (_dataPointsXTensor.shape[0] == 0)
+        {
+            RandomizeTrainingData();
+        }
 
         var lossFunction = torch.nn.MSELoss();
 
         var optimizer = torch.optim.SGD(_ann.parameters(), LearningRate);
 
-        var xTensor = torch.arange(1.0, EpochCount);
         var losses = torch.zeros(EpochCount);
 
         for (var epoch = 0; epoch < EpochCount; epoch++)
         {
-            var yHat = _ann.forward(_xTensor);
+            var yHat = _ann.forward(_dataPointsXTensor);
 
-            var loss = lossFunction.forward(yHat, _yTensor);
+            var loss = lossFunction.forward(yHat, _dataPointsYTensor);
 
             losses[epoch] = loss.item<float>();
 
@@ -180,25 +225,47 @@ public partial class MainViewModel : ViewModelBase
 
         _ann.zero_grad();
 
-        var observablePoints = GetObservablePointsFromTensors(xTensor, losses, _decimals);
-        foreach (var observablePoint in observablePoints)
+        var cost = lossFunction.forward(losses, torch.zeros(TrainingIterations, 1));
+        _costTensor[_currentTrainingIteration] = cost.item<float>();
+
+        _currentTrainingIteration++;
+
+        if (_currentTrainingIteration == TrainingIterations)
         {
-            LossesDataPoints.Add(observablePoint);
+            var lossesXTensor = torch.arange(1.0, EpochCount + 1);
+            var observableLossesPoints = GetObservablePointsFromTensors(lossesXTensor, losses, _decimals);
+            LossesDataPoints.Clear();
+            foreach (var observablePoint in observableLossesPoints)
+            {
+                LossesDataPoints.Add(observablePoint);
+            }
+
+            var costXTensor = torch.arange(1.0, TrainingIterations + 1);
+            var observableCostPoints = GetObservablePointsFromTensors(costXTensor, _costTensor, _decimals);
+            foreach (var observableCostPoint in observableCostPoints)
+            {
+                CostDataPoints.Add(observableCostPoint);
+            }
+
+            PredictData();
+
+            _currentTrainingIteration = 0;
+            return;
         }
+
+        RandomizeTrainingData();
+        TrainModel();
     }
 
     [RelayCommand]
     private void PredictData()
     {
-        if (_xTensor.shape[0] == 0)
+        if (_dataPointsXTensor.shape[0] == 0)
             return;
 
-        var predictedY = _ann.forward(_xTensor);
+        var predictedY = _ann.forward(_dataPointsXTensor);
 
-        var testLoss = (predictedY - _yTensor).pow(2).mean();
-        CalculatedMSE = testLoss.item<float>();
-
-        var observablePoints = GetObservablePointsFromTensors(_xTensor, predictedY, _decimals);
+        var observablePoints = GetObservablePointsFromTensors(_dataPointsXTensor, predictedY, _decimals);
 
         PredictedDataPoints.Clear();
         foreach (var observablePoint in observablePoints)
@@ -211,7 +278,7 @@ public partial class MainViewModel : ViewModelBase
     {
         var observablePoints = new ObservableCollection<ObservablePoint>();
 
-        if (!(xTensor.shape.Length == yTensor.shape.Length))
+        if (xTensor.shape.Length == 0 || (xTensor.shape.Length != yTensor.shape.Length))
             return observablePoints;
 
         for (var i = 0; i < xTensor.shape[0]; i++)
