@@ -3,40 +3,37 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:UdemyDeepLearningX.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="800"
              x:Class="UdemyDeepLearningX.Views.MainView"
              x:DataType="vm:MainViewModel"
              xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia">
 
-	<StackPanel Width="800" Spacing="40" Margin="20">
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="60">
+	<StackPanel Orientation="Horizontal" Spacing="40" Margin="20">
+			
+			<StackPanel Orientation="Vertical" Spacing="20" Width="150">
+				<TextBlock HorizontalAlignment="Stretch" Text="{Binding NumberOfDataPoints, StringFormat='Data Points: {0}'}"/>
+				<Slider Value="{Binding NumberOfDataPoints}"/>
 
-			<StackPanel Orientation="Vertical" >
-				<StackPanel Orientation="Horizontal" Spacing="20">
+				<TextBlock HorizontalAlignment="Stretch" Text="{Binding DataRange, StringFormat='Data Range: {0:0.00}'}"/>
+				<Slider Maximum="1" Value="{Binding DataRange}" IsSnapToTickEnabled="True" TickFrequency="0.01" />
 
-					<StackPanel Orientation="Vertical" Width="200">
-						<TextBlock HorizontalAlignment="Center" Text="{Binding NumberOfDataPoints, StringFormat='Data Points: {0}'}"/>
-						<Slider Value="{Binding NumberOfDataPoints}"/>
-					<Button HorizontalAlignment="Center" HorizontalContentAlignment="Center" Content="Randomize Points" Command="{Binding RandomizeTrainingDataCommand}" Width="150" />
-					</StackPanel>
+				<TextBlock HorizontalAlignment="Stretch" Text="{Binding LearningRate, StringFormat='Learning Rate: {0:0.00}'}"/>
+				<Slider Maximum="1" Value="{Binding LearningRate}" IsSnapToTickEnabled="True" TickFrequency="0.01"/>
 
-					<StackPanel Orientation="Vertical" Width="200">
-						<TextBlock HorizontalAlignment="Center" Text="{Binding LearningRate, StringFormat='Learning Rate: {0:0.00}'}"/>
-						<Slider Maximum="1" Value="{Binding LearningRate}" IsSnapToTickEnabled="True" TickFrequency="0.01"/>
-						<Button HorizontalAlignment="Center" HorizontalContentAlignment="Center" Content="Predict Points" Command="{Binding PredictDataCommand}" Width="150"/>
-					</StackPanel>
-
-					<StackPanel Orientation="Vertical" Width="200">
-						<TextBlock HorizontalAlignment="Center" Text="{Binding EpochCount, StringFormat='Number of Epochs: {0}'}"/>
-						<Slider Maximum="1000" Value="{Binding EpochCount}" />
-					<Button  HorizontalAlignment="Center" HorizontalContentAlignment="Center" Content="Train Model" Command="{Binding TrainModelCommand}" Width="150"/>
-					</StackPanel>
-				</StackPanel>
-
+				<TextBlock HorizontalAlignment="Stretch" Text="{Binding EpochCount, StringFormat='Epochs: {0}'}"/>
+				<Slider Maximum="1000" Value="{Binding EpochCount}" />
+				
+				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Predict Points" Command="{Binding PredictDataCommand}"/>
+				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Randomize Points" Command="{Binding RandomizeTrainingDataCommand}" />
+				<Button  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Train Model" Command="{Binding TrainModelCommand}"/>
+				<Button  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Reset Model" Command="{Binding ResetModelCommand}"/>
 			</StackPanel>
-		</StackPanel>
 
-		<lvc:CartesianChart VerticalAlignment="Bottom" Width="800" Height="600" Series="{Binding Series}"
-                            XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"  />
+		<lvc:CartesianChart Width="600" Height="600" 
+							Series="{Binding DataPointsSeries}" XAxes="{Binding DataPointsXAxes}" YAxes="{Binding DataPointsYAxes}"  />
+
+		<lvc:CartesianChart Width="600" Height="600"
+							Series="{Binding LossesPointsSeries}" XAxes="{Binding LossesPointsXAxes}" YAxes="{Binding LossesPointsYAxes}"  />
+
 	</StackPanel>
 </UserControl>
