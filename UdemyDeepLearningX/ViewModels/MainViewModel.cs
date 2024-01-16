@@ -54,7 +54,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private double _learningRate = 0.05;
     [ObservableProperty]
-    private int _epochCount = 500;
+    private int _epochCount = 250;
     [ObservableProperty]
     private int _trainingIterations = 10;
 
