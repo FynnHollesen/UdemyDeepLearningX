@@ -96,20 +96,24 @@ public partial class MainViewModel : ViewModelBase
         };
 
         _lossesPointsSeries = new ISeries[1];
-        _lossesPointsSeries[0] = new ScatterSeries<ObservablePoint>
+        _lossesPointsSeries[0] = new LineSeries<ObservablePoint>
         {
             Name = "Losses",
-            Fill = new SolidColorPaint(SKColors.PaleVioletRed),
+            Fill = null,
             GeometrySize = 6,
+            GeometryStroke = new SolidColorPaint(SKColors.PaleVioletRed),
+            Stroke = new SolidColorPaint(SKColors.PaleVioletRed),
             Values = _lossesDataPoints
         };
 
         _costPointsSeries = new ISeries[1];
-        _costPointsSeries[0] = new ScatterSeries<ObservablePoint>
+        _costPointsSeries[0] = new LineSeries<ObservablePoint>
         {
             Name = "Cost",
-            Fill = new SolidColorPaint(SKColors.PaleVioletRed),
+            Fill = null,
             GeometrySize = 6,
+            GeometryStroke = new SolidColorPaint(SKColors.PaleVioletRed),
+            Stroke = new SolidColorPaint(SKColors.PaleVioletRed),
             Values = _costDataPoints
         };
 
@@ -134,7 +138,7 @@ public partial class MainViewModel : ViewModelBase
         [
             new Axis
             {
-                MinLimit = 0,
+                MinLimit = 1,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
@@ -150,7 +154,7 @@ public partial class MainViewModel : ViewModelBase
         [
             new Axis
             {
-                MinLimit = 0,
+                MinLimit = 1,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
