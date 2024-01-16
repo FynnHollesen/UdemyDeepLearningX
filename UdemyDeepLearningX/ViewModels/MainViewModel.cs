@@ -48,6 +48,10 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private double _dataRange = 0.1;
     [ObservableProperty]
+    private double _dataSlope = 1;
+    [ObservableProperty]
+    private int _dataExponent = 1;
+    [ObservableProperty]
     private double _learningRate = 0.05;
     [ObservableProperty]
     private int _epochCount = 500;
@@ -173,7 +177,7 @@ public partial class MainViewModel : ViewModelBase
     private void RandomizeTrainingData()
     {
         _dataPointsXTensor = torch.randn(NumberOfDataPoints, 1);
-        _dataPointsYTensor = _dataPointsXTensor + torch.randn(NumberOfDataPoints, 1) * DataRange;
+        _dataPointsYTensor = DataSlope * torch.pow(_dataPointsXTensor, DataExponent) + torch.randn(NumberOfDataPoints, 1) * DataRange;
 
         var observablePoints = GetObservablePointsFromTensors(_dataPointsXTensor, _dataPointsYTensor, _decimals);
 

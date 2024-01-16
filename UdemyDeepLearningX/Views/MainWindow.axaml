@@ -7,7 +7,7 @@
         x:Class="UdemyDeepLearningX.Views.MainWindow"
         Icon="/Assets/logo.ico"
         Title="UdemyDeepLearningX"
-		Width="1600"
+		Width="2020"
 		Height="800">
 	<views:MainView />
 </Window>
