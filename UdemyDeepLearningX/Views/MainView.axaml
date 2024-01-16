@@ -35,8 +35,8 @@
 
 				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Randomize Points" Command="{Binding RandomizeTrainingDataCommand}" />
 				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Predict Points" Command="{Binding PredictDataCommand}"/>
-				<Button  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Train Model" Command="{Binding TrainModelCommand}"/>
-				<Button  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Reset Model" Command="{Binding ResetModelCommand}"/>
+				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Train Model" Command="{Binding TrainModelCommand}"/>
+				<Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Reset Model" Command="{Binding ResetModelCommand}"/>
 			</StackPanel>
 
 			<lvc:CartesianChart Width="600" Height="600"
