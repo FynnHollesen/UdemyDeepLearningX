@@ -130,8 +130,7 @@ public partial class MainViewModel : ViewModelBase
         [
             new Axis
             {
-                MaxLimit = EpochCount,
-                MinLimit =  1,
+                MinLimit = 0,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
@@ -139,8 +138,7 @@ public partial class MainViewModel : ViewModelBase
         [
             new Axis
             {
-                MaxLimit =  1,
-                MinLimit =  0,
+                MinLimit = 0,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
@@ -148,8 +146,7 @@ public partial class MainViewModel : ViewModelBase
         [
             new Axis
             {
-                MaxLimit = TrainingIterations,
-                MinLimit =  1,
+                MinLimit = 0,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
@@ -157,8 +154,7 @@ public partial class MainViewModel : ViewModelBase
         [
             new Axis
             {
-                MaxLimit =  1,
-                MinLimit =  0,
+                MinLimit = 0,
                 LabelsPaint = new SolidColorPaint(SKColors.LightGray)
             }
         ];
