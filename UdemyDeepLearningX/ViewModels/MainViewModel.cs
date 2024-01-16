@@ -46,7 +46,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private int _numberOfDataPoints = 20;
     [ObservableProperty]
-    private double _dataRange = 0.1;
+    private double _dataRange = 0.5;
     [ObservableProperty]
     private double _dataSlope = 1;
     [ObservableProperty]
