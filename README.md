@@ -1,6 +1,6 @@
 # UdemyDeepLearningX
 
-As a challenge, I decided to translate the skills learned through [DeepLearningX on Udemy](https://www.udemy.com/course/deeplearning_x/) into C# using SharpTorch, building a fun little research application along the way.
+As a challenge, I decided to translate the skills learned through [DeepLearningX on Udemy](https://www.udemy.com/course/deeplearning_x/) into C# using [SharpTorch](https://github.com/dotnet/TorchSharp), building a fun little research application along the way.
 
 You can play around with different parameters and see the effect on the model’s training outcome. (Requires CUDA)
 
